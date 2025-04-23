@@ -49,49 +49,21 @@
 #include "xparameters.h"
 #include "xgpio.h"
 
-// 簡單延遲（小延遲單位，模擬 PWM 頻率）
-void short_delay() {
-    volatile int i;
-    for (i = 0; i < 800; i++) {
-        ;
-    }
-}
+#define LIMIT_VALUE 100  // 要寫入的限制值
 
 int main()
 {
-    XGpio LED_XGpio;
-    int brightness = 0;     // 亮度 0~100（占空比百分比）
-    int direction = 1;      // 變亮(+1) 或變暗(-1)
-    int i;
+    XGpio Gpio_Limit;
 
-    XGpio_Initialize(&LED_XGpio, XPAR_AXI_GPIO_0_DEVICE_ID);
-    XGpio_SetDataDirection(&LED_XGpio, 1, 0);
+    XGpio_Initialize(&Gpio_Limit, XPAR_AXI_GPIO_0_DEVICE_ID);
 
-    printf("Start Software PWM Breathing LED...\n");
+    // 設定 GPIO 為輸出方向（由 PS 輸出數值）
+    XGpio_SetDataDirection(&Gpio_Limit, 1, 0x00);  // Channel 1, 全部為輸出
 
-    while (1) {
-        // 一次 PWM cycle 模擬：100 steps
-        for (i = 0; i < 300; i++) {
-            if (i < brightness)
-                XGpio_DiscreteWrite(&LED_XGpio, 1, 0b00000001); // LED ON
-            else
-                XGpio_DiscreteWrite(&LED_XGpio, 1, 0b00000000); // LED OFF
+    // 寫入數值到 PL 模組 (HW1) 的 i_limit
+    XGpio_DiscreteWrite(&Gpio_Limit, 1, LIMIT_VALUE);
 
-            short_delay(); // 控制頻率
-        }
-
-        // 調整亮度
-        brightness += direction;
-
-        // 到最大或最小亮度就反轉
-        if (brightness >= 300 || brightness <= 0) {
-            direction = -direction;
-        }
-    }
+    printf("已寫入限制值: %d\n", LIMIT_VALUE);
 
     return 0;
 }
-
-
-
-
