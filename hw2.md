@@ -1,4 +1,4 @@
-找尋中斷id
+設置
 ![image](https://github.com/user-attachments/assets/3f71c841-2b54-4a2b-93d3-c512feb93d16)
 
 產生中斷
