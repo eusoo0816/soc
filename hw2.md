@@ -1,7 +1,7 @@
 找尋中斷id
 ![image](https://github.com/user-attachments/assets/3f71c841-2b54-4a2b-93d3-c512feb93d16)
 
-
+手冊查找
 ![image](https://github.com/user-attachments/assets/99d60277-cf1b-4a99-970e-2e6a4c259302)
 
 中斷暫存器
