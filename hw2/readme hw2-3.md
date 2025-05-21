@@ -19,5 +19,10 @@
 
 ![image](https://github.com/user-attachments/assets/83422c84-b1c9-4c0b-9e73-fb3ee3f3f278)
 
+4.啟動開關:LED亮起代表進入中斷
 
+
+
+
+https://github.com/user-attachments/assets/853bb46b-84e4-40eb-baba-060cc330f889
 
