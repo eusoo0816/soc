@@ -56,49 +56,46 @@
 
 int main()
 {
-    {    
-    // Step 1: Write count_max to slv_reg0
-    unsigned int count_max = 20;
-    printf("Writing count_max: %u to slv_reg0 (offset 0x00)\n", count_max);
-    Xil_Out32(IP_BASE_ADDR, count_max);
-    printf("Write completed. Please press the button to start counting...\n");
+    // Step 0: 初始化 AXI GPIO 並寫入 LIMIT_VALUE 到 PL
+    XGpio Gpio_Limit;
+    if (XGpio_Initialize(&Gpio_Limit, XPAR_AXI_GPIO_0_DEVICE_ID) != XST_SUCCESS) {
+        printf("GPIO fail！\n");
+        return -1;
+    }
 
-    // Step 2: Poll slv_reg1 (count_value) and slv_reg2 (done)
+    XGpio_SetDataDirection(&Gpio_Limit, 1, 0x00);  //output
+    XGpio_DiscreteWrite(&Gpio_Limit, 1, LIMIT_VALUE);
+    printf("已寫入 GPIO 限制值: %d\n", LIMIT_VALUE);
+
+    // Step 1: write in
+    unsigned int count_max = 20;
+    printf("寫入 count_max: %u 到 slv_reg0 (offset 0x00)\n", count_max);
+    Xil_Out32(IP_BASE_ADDR + 0x00, count_max);
+
+    printf("go!...\n");
+
+    // Step 2: return runing
     unsigned int count_value = 0;
     unsigned int done = 0;
-    printf("Starting to poll counter status...\n");
-    // [MODIFIED] Updated expected counting time for count_max = 10
-    printf("Expected counting time: ~3.35 seconds (10 counts, ~335ms per count)\n");
+
+    printf("start\n");
+    printf("time %.2f s \n", count_max * 0.335);
 
     while (done == 0) {
-        count_value = Xil_In32(IP_BASE_ADDR + 0x04); // Read slv_reg1
-        done = Xil_In32(IP_BASE_ADDR + 0x08);       // Read slv_reg2
-        printf("[Status] count_value: %u, done: %u\n", count_value, done);
-        usleep(500000); // 500ms delay to match ~335ms counting period
+        count_value = Xil_In32(IP_BASE_ADDR + 0x04); // slv_reg1
+        done = Xil_In32(IP_BASE_ADDR + 0x08);        // slv_reg2
+        printf("[state] count_value: %u, done: %u\n", count_value, done);
+        usleep(500000);  // 每 0.5 秒讀一次
     }
 
-    // Step 3: Verify final state
+    // Step 3: result
     count_value = Xil_In32(IP_BASE_ADDR + 0x04);
-    printf("Counting completed!\n");
-    printf("Final count_value (should be 0): %u\n", count_value);
-    printf("Done flag (should be 1): %u\n", done);
+    printf("計數完成！\n");
+    printf("最終 count_value: %u\n", count_value);
+    printf("Done 旗標: %u\n", done);
 
-    printf("=== Test Finished ===\n");
-    while (1);
-    return 0;
-    }
-    XGpio Gpio_Limit;
-
-    XGpio_Initialize(&Gpio_Limit, XPAR_AXI_GPIO_0_DEVICE_ID);
-
-    // 設定 GPIO 為輸出方向（由 PS 輸出數值）
-    XGpio_SetDataDirection(&Gpio_Limit, 1, 0x00);  // Channel 1, 全部為輸出
-
-    // 寫入數值到 PL 模組 (HW1) 的 i_limit
-    XGpio_DiscreteWrite(&Gpio_Limit, 1, LIMIT_VALUE);
-
-    printf("已寫入限制值: %d\n", LIMIT_VALUE);
-
+    printf("done\n");
+    while (1); //read
     return 0;
 }
 
